@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "postgresql"
+  url          = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  relationMode = "prisma"
+}
+
+model Category {
+  id     String @id @default(uuid())
+  name   String
+  userId String
+  tasks  Task[]
+}
+
+model Task {
+  id          String    @id @default(uuid())
+  title       String    @db.Text
+  description String?   @db.Text
+  status      String    @default("TO_DO")
+  isImportant Boolean   @default(false)
+  isPublic    Boolean   @default(false)
+  color       String    @default("default")
+  dueDate     DateTime?
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  attachments Attachment[]
+
+  reminderId Int?      @unique
+  reminder   Reminder? @relation(fields: [reminderId], references: [id], onDelete: SetNull)
+
+  userId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+}
+
+enum Repeat {
+  NEVER
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+model Reminder {
+  id           Int       @id @default(autoincrement())
+  dueDate      DateTime  @db.Timestamp() // Fecha de vencimiento de la tarea
+  daysBefore   Int?      @default(1) // Días antes de la fecha de vencimiento para enviar el recordatorio
+  repeat       Repeat    @default(NEVER) // Frecuencia de repetición de la tarea
+  interval     Int?      @default(1) // Intervalo de repetición de la tarea en días, semanas, meses o años
+  lastSentDate DateTime? @db.Timestamp() // Fecha del último recordatorio enviado
+
+  task Task?
+}
+
+model Attachment {
+  id   String @id @default(uuid())
+  name String
+  url  String @db.Text
+
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([taskId])
+}

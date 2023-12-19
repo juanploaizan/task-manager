@@ -10,6 +10,7 @@ import { Attachment, Task } from "@prisma/client";
 
 import { Button } from "@/components/ui/button";
 import { FileUpload } from "@/components/file-upload";
+import Link from "next/link";
 
 interface AttachmentFormProps {
   initialData: Task & { attachments: Attachment[] };
@@ -83,8 +84,14 @@ export const AttachmentForm = ({
                   key={attachment.id}
                   className="flex items-center p-3 w-full bg-sky-100 border-sky-200 border text-primary rounded-md"
                 >
-                  <File className="h-4 w-4 mr-2 flex-shrink-0" />
-                  <p className="text-xs line-clamp-1">{attachment.name}</p>
+                  <Link
+                    href={attachment.url}
+                    target="_blank"
+                    className="flex items-center"
+                  >
+                    <File className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <p className="text-xs line-clamp-1">{attachment.name}</p>
+                  </Link>
                   {deletingId === attachment.id && (
                     <div>
                       <Loader2 className="h-4 w-4 animate-spin" />
